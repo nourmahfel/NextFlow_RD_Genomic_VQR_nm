@@ -56,6 +56,11 @@
                     "description": "Flag to indicate if FASTQC should be performed",
                     "default": false
                 },
+                "trimmomatic": {
+                    "type": "boolean",
+                    "description": "Flag to indicate if Trimmomatic should be performed",
+                    "default": false
+                },
                 "index_genome": {
                     "type": "boolean",
                     "description": "Index the genome if not already done",
@@ -98,7 +103,8 @@
                 "degraded_dna",
                 "max_memory",
                 "max_time",
-                "max_cpus"
+                "max_cpus",
+                "trimmomatic"
             ]
         }
     },

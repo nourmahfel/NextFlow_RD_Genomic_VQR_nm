@@ -1,8 +1,12 @@
-name:
-  NextFlow_Gen_RD
+name: nf-training
 channels:
-  - bioconda
   - conda-forge
+  - bioconda
 dependencies:
-  - python=3.10
+  - python=3.10.0
   - nextflow
+  - salmon=1.5
+  - fastqc=0.11
+  - multiqc
+  - nf-core
+  - graphviz

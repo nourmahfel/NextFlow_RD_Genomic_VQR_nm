@@ -14,6 +14,7 @@ log.info """\
     qsr truth vcfs  : ${params.qsrVcfs}
     output directory: ${params.outdir}
     fastqc          : ${params.fastqc}
+    trimmomatic     : ${params.trimmomatic}
     aligner         : ${params.aligner}
     variant caller  : ${params.variant_caller}
     bqsr            : ${params.bqsr}
@@ -29,6 +30,9 @@ if (params.index_genome) {
 }
 if (params.fastqc) {
     include { FASTQC } from './modules/FASTQC'
+}
+if (params.trimmomatic) {
+    include { TRIMMOMATIC } from './modules/trimmomatic'
 }
 include { sortBam } from './modules/sortBam'
 include { markDuplicates } from './modules/markDuplicates'
@@ -96,6 +100,13 @@ workflow {
     // Run FASTQC on read pairs
     if (params.fastqc) {
         FASTQC(read_pairs_ch)
+    }
+
+    // Run Trimmomatic if enabled
+    if (params.trimmomatic) {
+        trimmed_reads_ch = channel.of(trimmed_reads_R1, trimmed_reads_R2)
+    } else {
+        trimmed_reads_ch = read_pairs_ch
     }
 
     // Align reads to the indexed genome
@@ -251,6 +262,27 @@ workflow FASTQC_only {
 
     if (params.fastqc) {
         FASTQC(read_pairs_ch)
+    }
+}
+
+workflow TRIMMOMATIC_only {
+    // Set channel to gather read_pairs
+    read_pairs_ch = Channel
+        .fromPath(params.samplesheet)
+        .splitCsv(sep: '\t')
+        .map { row ->
+            if (row.size() == 4) {
+                tuple(row[0], [row[1], row[2]])
+            } else if (row.size() == 3) {
+                tuple(row[0], [row[1]])
+            } else {
+                error "Unexpected row format in samplesheet: $row"
+            }
+        }
+    read_pairs_ch.view()
+
+    if (params.trimmomatic) {
+        TRIMMOMATIC(read_pairs_ch)
     }
 }
 
